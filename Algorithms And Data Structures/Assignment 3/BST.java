@@ -4,7 +4,7 @@
  *
  *  @version 3.0 1/11/15 16:49:42
  *
- *  @author TODO
+ *  @author Alex Mahon 17335349
  *
  *************************************************************************/
 
@@ -94,7 +94,9 @@ public class BST<Key extends Comparable<Key>, Value> {
     /**
      * Tree height.
      *
-     * Asymptotic worst-case running time using Theta notation: TODO
+     * Asymptotic worst-case running time using Theta notation: Θ(N)
+     *  -> Worst case to find the height the program would have to iterate through every single node hence making
+     *     a worst-case running time of Θ(N).
      *
      * @return the number of links from the root to the deepest leaf.
      *
@@ -114,18 +116,24 @@ public class BST<Key extends Comparable<Key>, Value> {
       if(size() == 1) {
     	  return 0;
       }
-      
-      int hLeft = 0;
-      int hRight = 0;
-      
-      if (root.left != null) hLeft = size(root.left);
-      if (root.right != null) hRight = size(root.right);
-      
-      if (hLeft > hRight) {
-          return hLeft + 1;
-      } else {
-          return hRight + 1;
-      }
+      return heightCalc(root);
+    }
+    
+    private int heightCalc(Node node) {
+    	 if (node == null) 
+             return 0; 
+         else 
+         { 
+             /* compute the depth of each subtree */
+             int lDepth = heightCalc(node.left); 
+             int rDepth = heightCalc(node.right); 
+    
+             /* use the larger one */
+             if (lDepth > rDepth) 
+                 return (lDepth + 1); 
+              else 
+                 return (rDepth + 1); 
+         } 
     }
 
     /**
@@ -137,14 +145,19 @@ public class BST<Key extends Comparable<Key>, Value> {
      */
     public Key median() {
       if (isEmpty()) return null;
-      //TODO fill in the correct implementation. The running time should be Theta(h), where h is the height of the tree.
-      int size = size();
-      size++;
-      size = size/2;
-      return size;
+      int medianInt = size()+1;
+      medianInt = medianInt/2;
+      Node x = select(root, medianInt);
+      return x.key;
     }
 
-
+    private Node select(Node x, int n) {
+    	if (x== null) return null;
+    	int t = size(x.left);
+    	if		( t > n) return select(x.left, n);
+    	else if ( t < n) return select(x.right, n-t-1);
+    	else 			 return x;
+    }
     /**
      * Print all keys of the tree in a sequence, in-order.
      * That is, for each node, the keys in the left subtree should appear before the key in the node.
@@ -168,8 +181,22 @@ public class BST<Key extends Comparable<Key>, Value> {
      */
     public String printKeysInOrder() {
       if (isEmpty()) return "()";
-      // TODO fill in the correct implementation
-      return null;
+      String listOfKeys = "";
+      listOfKeys = pkioSelect(root,listOfKeys);
+      return listOfKeys;
+    }
+    
+    private String pkioSelect(Node x, String keyList) {
+    	if (x == null) {
+    		keyList = keyList + "()";
+    		return keyList;
+    	}
+    	keyList = keyList + "(";
+       	keyList = pkioSelect(x.left, keyList);
+		keyList = keyList + x.key;
+		keyList = pkioSelect(x.right, keyList);
+		keyList = keyList + ")";
+		return keyList;
     }
     
     /**
@@ -178,10 +205,27 @@ public class BST<Key extends Comparable<Key>, Value> {
      * @return a multi-line string with the pretty ascii picture of the tree.
      */
     public String prettyPrintKeys() {
-      //TODO fill in the correct implementation.
-      return null;
+    	if (isEmpty()) return "-null\n";
+        String printKeys = "";
+        String prefix = "";
+        printKeys = ppkSelect(root,printKeys,prefix);
+        return printKeys;
     }
-
+    
+    private String ppkSelect(Node x, String keyList, String prefix) {
+    	if (x == null) {
+    		keyList = keyList + prefix + "-null\n";
+    		return keyList;
+    	}
+    	keyList = keyList + prefix + "-" +x.key + "\n";
+    	prefix = prefix + " |";
+       	keyList = ppkSelect(x.left, keyList, prefix);
+       	prefix = prefix.substring(0, prefix.length()-2);
+       	prefix = prefix + "  ";
+		keyList = ppkSelect(x.right, keyList, prefix);
+		return keyList;
+    }
+    
     /**
      * Deteles a key from a tree (if the key is in the tree).
      * Note that this method works symmetrically from the Hibbard deletion:
@@ -191,7 +235,47 @@ public class BST<Key extends Comparable<Key>, Value> {
      * @param key the key to delete
      */
     public void delete(Key key) {
-      //TODO fill in the correct implementation.
+    	if (isEmpty()) return;
+    	if (!contains(key)) return;
+		Node prevX = null;
+		Node x = root;
+	
+		while (x != null && x.key != key) {
+			prevX = x;
+			
+			if (key.compareTo(x.key) < 0) x = x.left;
+			else x = x.right;
+		}
+	
+		if (x.left == null && x.right == null){
+			if (x != root){
+				if (prevX.left == x)prevX.left = null; 
+				else prevX.right = null;
+			}
+			else root = null;
+		}
+		else if (x.left != null && x.right != null){
+			Node predecessor = maximumKey(x.left);
+			delete(predecessor.key);
+			x.key = predecessor.key;
+		}
+		else{
+			Node child = (x.left != null)? x.left: x.right;
+			
+			if (x != root){
+				if (x == prevX.left) prevX.left = child;
+				else prevX.right = child;
+			} 
+			else root = child;
+		}
+		return;
     }
+    
+    private Node maximumKey(Node ptr) {
+		while (ptr.right != null){
+			ptr = ptr.right;
+		}
+		return ptr;
+	}
 
 }

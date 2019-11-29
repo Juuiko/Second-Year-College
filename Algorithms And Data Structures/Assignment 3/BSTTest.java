@@ -10,14 +10,12 @@ import org.junit.runners.JUnit4;
  *
  *  @version 3.1 09/11/15 11:32:15
  *
- *  @author  TODO
+ *  @author  Alex Mahon 17335349
  */
 
 @RunWith(JUnit4.class)
 public class BSTTest
 {
-  
-  //TODO write more tests here.
 
 @Test
 public void testHeight() {
@@ -28,21 +26,62 @@ public void testHeight() {
 	bst.put(8, 8); 
 	bst.put(3, 3);
 	assertEquals("Checking height of 2 tall tree", 2, bst.height());
+	BST<Integer, Integer> bst2 = new BST<Integer, Integer>();
+	bst2.put(7, 7);
+    bst2.put(8, 8);
+    bst2.put(3, 3);
+    bst2.put(1, 1);
+    bst2.put(2, 2);
+    bst2.put(6, 6);
+    bst2.put(4, 4);
+    bst2.put(5, 5);
+	assertEquals("Checking height of 5 tall tree", 5, bst2.height());
 }
 
 @Test
 public void testMedian() {
 	BST<Integer, Integer> bst = new BST<Integer, Integer>();
-	assertEquals("Checking height of empty tree", null, bst.median());
+	assertEquals("Checking median of empty tree", null, bst.median());
+	bst.put(7, 7);
+    bst.put(8, 8);
+    bst.put(3, 3);
+    bst.put(1, 1);
+    bst.put(2, 2);
+    bst.put(6, 6);
+    bst.put(4, 4);
+    bst.put(5, 5);
+	assertEquals("Checking median of empty tree", "5", "" + bst.median());
 }
   
+@Test
+public void testPrintKeysInOrder() {
+	BST<Integer, Integer> bst = new BST<Integer, Integer>();
+	assertEquals("Checking keyList of empty tree", "()", bst.printKeysInOrder());
+	bst.put(3, 3);
+	assertEquals("Checking keyList of 1 element tree", "(()3())", bst.printKeysInOrder());
+	bst.put(1, 1);
+    bst.put(4, 4);
+    bst.put(5, 5);
+	assertEquals("Checking keyList of full tree", "((()1())3(()4(()5())))", bst.printKeysInOrder());
+	BST<Integer, Integer> bst2 = new BST<Integer, Integer>();
+	bst2.put(7, 7);
+	bst2.put(8, 8);
+	bst2.put(3, 3);
+	bst2.put(1, 1);
+	bst2.put(2, 2);
+	bst2.put(6, 6);
+	bst2.put(4, 4);
+	bst2.put(5, 5);
+	assertEquals("Checking keyList of full tree", "(((()1(()2()))3((()4(()5()))6()))7(()8()))", bst2.printKeysInOrder());
+
+}
+
   /** <p>Test {@link BST#prettyPrintKeys()}.</p> */
       
- //@Test
+ @Test
  public void testPrettyPrint() {
      BST<Integer, Integer> bst = new BST<Integer, Integer>();
-     assertEquals("Checking pretty printing of empty tree",
-             "-null\n", bst.prettyPrintKeys());
+     assertEquals("Checking pretty printing of empty tree", "-null\n", bst.prettyPrintKeys());
       
                           //  -7
                           //   |-3
@@ -85,21 +124,21 @@ public void testMedian() {
 
   
      /** <p>Test {@link BST#delete(Comparable)}.</p> */
-    // @Test
+     @Test
      public void testDelete() {
          BST<Integer, Integer> bst = new BST<Integer, Integer>();
          bst.delete(1);
          assertEquals("Deleting from empty tree", "()", bst.printKeysInOrder());
          
          bst.put(7, 7);   //        _7_
-         bst.put(8, 8);   //      /     \
-         bst.put(3, 3);   //    _3_      8
+         bst.put(8, 8);   //      /     
+         bst.put(3, 3);   //    _3_      
          bst.put(1, 1);   //  /     \
-         bst.put(2, 2);   // 1       6
-         bst.put(6, 6);   //  \     /
-         bst.put(4, 4);   //   2   4
-         bst.put(5, 5);   //        \
-                          //         5
+         bst.put(2, 2);   // 1       4
+         bst.put(6, 6);   //  \       \
+         bst.put(4, 4);   //   2   	   5
+         bst.put(5, 5);   //
+                          //         
          
          assertEquals("Checking order of constructed tree",
                  "(((()1(()2()))3((()4(()5()))6()))7(()8()))", bst.printKeysInOrder());
@@ -112,8 +151,7 @@ public void testMedian() {
          assertEquals("Deleting leaf", "(((()1(()2()))3((()4(()5()))6()))7())", bst.printKeysInOrder());
  
          bst.delete(6);
-         assertEquals("Deleting node with single child",
-                 "(((()1(()2()))3(()4(()5())))7())", bst.printKeysInOrder());
+         assertEquals("Deleting node with single child", "(((()1(()2()))3(()4(()5())))7())", bst.printKeysInOrder());
  
          bst.delete(3);
          assertEquals("Deleting node with two children",
