@@ -9,6 +9,7 @@
 #include "huff.h"
 #include "bitfile.h"
 
+#include "string.h"
 
 // create a new huffcoder structure
 struct huffcoder *  huffcoder_new()
@@ -20,7 +21,22 @@ struct huffcoder *  huffcoder_new()
 // frequency to one
 void huffcoder_count(struct huffcoder * this, char * filename)
 {
+   unsigned char c;  // we need the character to be
+                     // unsigned to use it as an index
+   FILE * file = fopen(filename, "r");
 
+   int freqTable [126];
+   memset(freqTable, 0, sizeof(freqTable));
+
+   c = fgetc(file);	// attempt to read a byte
+   while( !feof(file) ) {
+     freqTable[c]++;
+     c = fgetc(file);
+   }
+   for (int i; i<126; i++) {
+   printf("%c : %d\n", i, freqTable[i]);
+   }
+   fclose(file);
 }
 
 
@@ -78,4 +94,3 @@ void huffcoder_decode(struct huffcoder * this, char * input_filename,
 {
 
 }
-  
