@@ -41,46 +41,50 @@ struct cpu *c = cpus;
 // +++++++ ONLY MODIFY BELOW THIS LINE ++++++++++++++++++++++++++++++
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void
-scheduler(void)
-{ int runnableFound; // DO NOT MODIFY/DELETE
+void scheduler(void) {
 
-  c->proc = 0;
+     int runnableFound; // DO NOT MODIFY/DELETE
+     int pix2;
+     struct proc *p2;
+     c->proc = 0;
 
-  runnableFound = 1 ; // force one pass over ptable
+     runnableFound = 1 ; // force one pass over ptable
 
-  while(runnableFound){ // DO NOT MODIFY
-    // Enable interrupts on this processor.
-    // sti();
-    runnableFound = 0; // DO NOT MODIFY
-    // Loop over process table looking for process to run.
-    // acquire(&ptable.lock);
-    for(pix = 0; pix < NPROC; pix++){
-      p = &ptable.proc[pix];
+     while(runnableFound) { // DO NOT MODIFY
+          // Enable interrupts on this processor.
+          // sti();
+          runnableFound = 0; // DO NOT MODIFY
+          // Loop over process table looking for process to run.
+          // acquire(&ptable.lock);
+          for(pix = 0; pix < NPROC; pix++){
+                p = &ptable.proc[pix];
 
-      if(p->state != RUNNABLE)
-        continue;
+                if(p->state != RUNNABLE) continue;
 
-      runnableFound = 1; // DO NOT MODIFY/DELETE/BYPASS
+                runnableFound = 1; // DO NOT MODIFY/DELETE/BYPASS
+                for(pix2 = pix+1; pix2 != pix; pix2++){
+                     p2 = &ptable.proc[pix2];
+                     if (p2->state == RUNNABLE) {
+                          if (p->prio>p2->prio) p = &ptable.proc[pix2];
+                     }
+                     if (pix2 >= NPROC) pix2 = -1;
+                }
+                // Switch to chosen process.  It is the process's job
+                // to release ptable.lock and then reacquire it
+                // before jumping back to us.
+                c->proc = p;
+                //switchuvm(p);
+                p->state = RUNNING;
 
-      
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      //switchuvm(p);
-      p->state = RUNNING;
 
-
-      swtch(p);
-      // p->state should not be running on return here.
-      //switchkvm();
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
-    }
-    // release(&ptable.lock);
-
-  }
-  printf("No RUNNABLE process!\n");
+                swtch(p);
+                // p->state should not be running on return here.
+                //switchkvm();
+                // Process is done running for now.
+                // It should have changed its p->state before coming back.
+                c->proc = 0;
+           }
+      // release(&ptable.lock);
+      }
+      printf("No RUNNABLE process!\n");
 }
