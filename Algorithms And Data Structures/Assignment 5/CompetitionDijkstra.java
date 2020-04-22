@@ -1,7 +1,7 @@
 import java.io.*;
-import java.util.StringTokenizer;
+import java.util.*;
 
-/*
+/**
  * A Contest to Meet (ACM) is a reality TV contest that sets three contestants at three random
  * city intersections. In order to win, the three contestants need all to meet at any intersection
  * of the city as fast as possible.
@@ -16,48 +16,155 @@ import java.util.StringTokenizer;
  * streets that the contestants can use to traverse the city.
  *
  * This class implements the competition using Dijkstra's algorithm
+ * 
+ *  @author Alex Mahon
  */
 
 public class CompetitionDijkstra {
 
+    int sA;
+    int sB;
+    int sC;
+    boolean cWS;
+    TreeMap<Integer, Node> network;
+    
+    class Node {
+        int id;
+        double cost = 10000;
+        ArrayList<Path> paths = new ArrayList<>();
+
+        Node(int id) {
+            this.id = id;
+        }
+
+        void addAdjacent(Node node, double cost) {
+            paths.add(new Path(node, cost));
+        }
+    }
+
+    class Path {
+        Node dest;
+        double cost;
+
+        Path(Node dest, double cost) {
+            this.dest = dest;
+            this.cost = cost;
+        }
+    }
+    
     /**
      * @param filename: A filename containing the details of the city road network
      * @param sA, sB, sC: speeds for 3 contestants
-     * @throws IOException 
+     * @throws IOException if filename is invalid
     */
-    CompetitionDijkstra (String filename, int sA, int sB, int sC) throws IOException{
-    	BufferedReader file = new BufferedReader(new FileReader(filename));
-    	
-    	String arraySize = file.readLine();
-    	int aS = Integer.parseInt(arraySize);
-    	
-    	String streetNumber = file.readLine();
-    	int sN = Integer.parseInt(streetNumber);
-    	
-    	float[][] network = new float[aS][aS];
-    	for (int i=0; i<sN; i++) {
-    		StringTokenizer streetInfo = new StringTokenizer(file.readLine());
-    		int x = Integer.parseInt(streetInfo.nextToken());
-    		int y = Integer.parseInt(streetInfo.nextToken());
-    		network[x][y] = Float.parseFloat(streetInfo.nextToken());
-    		System.out.println(x);
-    		System.out.print(" ");
-    		System.out.print(y);
-    		System.out.print(" ");
-    		System.out.print(network[x][y]);
+    CompetitionDijkstra (String filename, int sA, int sB, int sC) {
+    	Boolean correctWalkingSpeed = false;
+    	if ((sA >= 50 && sA <= 100) && (sB >= 50 && sB <= 100) && (sC >= 50 && sC <= 100)) {
+    		correctWalkingSpeed = true;
     	}
-    	
-    	file.close();
+    	cWS = correctWalkingSpeed;
+    	this.sA = sA;
+    	this.sB = sB;
+    	this.sC = sC;
+        Scanner file;
+		
+		if (filename != null) {
+			try {
+				file = new Scanner(new FileInputStream(filename));
+				int nodeNum = file.nextInt(); // Number of nodes
+				
+				if (nodeNum < 3) {
+					cWS = false;
+				}
+		    	
+		    	int sN = file.nextInt(); //Street number
+		    	
+		    	network = new TreeMap<>();
+		    	for (int i=0; i<sN; i++) {
+		    		int pointA = file.nextInt();
+		            int pointB = file.nextInt();
+		            double dist = file.nextDouble();
+		            Node nodeA, nodeB;
+		            
+		            if (network.get(pointA) == null) {
+		                nodeA = new Node(pointA);
+		                network.put(pointA, nodeA);
+		            } else {
+		            	nodeA = network.get(pointA);
+		            }
+
+
+		            if (network.get(pointB) == null) {
+		                nodeB = new Node(pointB);
+		                network.put(pointB, nodeB);
+		            } else {
+		            	nodeB = network.get(pointB);
+		            }
+		            
+		            nodeA.addAdjacent(nodeB, dist);
+		    	}
+		    	file.close();
+			} catch (FileNotFoundException e) {
+				cWS = false;
+			}
+		} else {
+			cWS = false;
+		}
+    }
+    
+    /**
+     * @param start: start of path length lookup
+     */
+    public double shortestPathToFurthestNode(int start){
+    	LinkedList<Node> nodes = new LinkedList<>();
+        for (Node node : network.values()) {
+            if (node.id == start) node.cost = 0;
+            else node.cost = 100000;
+            
+            nodes.add(node);
+        }
+
+        for (int i = 0; i < network.values().size(); i++) {
+            for (Node node : nodes) {
+                for (Path path : node.paths) {
+                    double costN = node.cost + path.cost;
+                    if (costN < path.dest.cost) {
+                        path.dest.cost = costN;
+                    }
+                }
+            }
+        }
+
+        double max = 0;
+        for (Node node : network.values()) {
+            if (node.cost == 100000) return node.cost;
+            else if (node.cost > max)
+                max = node.cost;
+        }
+        return max;
     }
 
-
     /**
-    * @return int: minimum minutes that will pass before the three contestants can meet
+     * @return int: max minutes that will pass before the three contestants can meet if they take the shortest path
      */
     public int timeRequiredforCompetition(){
-
-        //TO DO
-        return -1;
+    	if (cWS == false) {
+    		return -1;
+    	}
+        double maxDist = 0;
+        for (Node node : network.values()) {
+            double dist = shortestPathToFurthestNode(node.id);
+            if (dist == 100000) return -1;
+            if (dist > maxDist) maxDist = dist;
+        }
+        int slowest = sA;
+        if (sA > sB) {
+        	slowest = sB;
+        }
+        if (slowest > sC) {
+        	slowest = sC;
+        }
+        return (int) Math.ceil((maxDist*1000) / slowest);
     }
 
 }
