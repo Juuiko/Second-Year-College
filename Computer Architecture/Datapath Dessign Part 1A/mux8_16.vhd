@@ -12,7 +12,7 @@ entity mux8_16 is
 		in6 : in std_logic_vector(15 downto 0);
 		in7 : in std_logic_vector(15 downto 0);
 		S : in std_logic_vector(2 downto 0);
-		Z : out std_logic_vector(3 downto 0));
+		Z : out std_logic_vector(15 downto 0));
 end mux8_16;
 
 architecture behavioral of mux8_16 is
@@ -24,6 +24,5 @@ begin
          in4 when (S="100") else
          in5 when (S="101") else
          in6 when (S="110") else
-         in7 when (S="111") else
-         "0000000000000000" after 5 ns;
+         in7 when (S="111");
 end behavioral;

@@ -9,7 +9,7 @@ entity reg16 is
 		Q : out std_logic_vector(15 downto 0));
 end reg16;
 
-architecture Behavioral of reg4 is
+architecture behavioral of reg16 is
 
 begin
 	process(clk)
@@ -20,4 +20,4 @@ begin
 			end if;
 		end if;
 	end process;
-end Behavioral;
+end behavioral;

@@ -6,9 +6,7 @@ entity register_file is
 		src_s0 : in std_logic;
 		src_s1 : in std_logic;
 		src_s2 : in std_logic;
-		des_A0 : in std_logic;
-		des_A1 : in std_logic;
-		des_A2 : in std_logic;
+		dest : in std_logic_vector(2 downto 0);
 
 		clk : in std_logic;
 
@@ -22,7 +20,7 @@ entity register_file is
 		reg_4 : out std_logic_vector(15 downto 0);
 		reg_5 : out std_logic_vector(15 downto 0);
 		reg_6 : out std_logic_vector(15 downto 0);
-		reg_7 : out std_logic_vector(15 downto 0); 		
+		reg_7 : out std_logic_vector(15 downto 0)); 		
 end register_file;
 
 architecture behavioral of register_file is
@@ -48,10 +46,10 @@ end component;
 
 component mux2_16 port(
 	S : in std_logic;
-		in0 : in std_logic_vector(15 downto 0);
-		in1 : in std_logic_vector(15 downto 0);
-		Z : out std_logic_vector(15 downto 0));
-end component
+	in0 : in std_logic_vector(15 downto 0);
+	in1 : in std_logic_vector(15 downto 0);
+	Z : out std_logic_vector(15 downto 0));
+end component;
 
 component mux8_16 port(
 	in0 : in std_logic_vector(15 downto 0);
@@ -63,8 +61,8 @@ component mux8_16 port(
 	in6 : in std_logic_vector(15 downto 0);
 	in7 : in std_logic_vector(15 downto 0);
 	S : in std_logic_vector(2 downto 0);
-	Z : out std_logic_vector(3 downto 0));
-end component
+	Z : out std_logic_vector(15 downto 0));
+end component;
 
 
 signal load_reg0 : std_logic;
@@ -99,8 +97,8 @@ begin
 	reg6: reg16 port map(D => Z_mux, load => load_reg6, clk => clk, Q => Q_reg6);
 	reg7: reg16 port map(D => Z_mux, load => load_reg7, clk => clk, Q => Q_reg7);
 
-	decoder_3to8: decoder_3to8 port map(
-		A0 => dest_select(2 downto 0),
+	decoder: decoder3_8 port map(
+		A => dest(2 downto 0),
 		q0 => load_reg0,
 		q1 => load_reg1,
 		q2 => load_reg2,
@@ -111,9 +109,14 @@ begin
 		q7 => load_reg7
 	);
 
-	mux2_16: mux2_16 port map(in0 => data, in1 => D_reg, s => data_src, Z => Z_mux);
+	muxA: mux2_16 port map(
+	   in0 => data,
+	   in1 => D_reg,
+	   s => data_src,
+	   Z => Z_mux
+	 );
 
-	mux8_16: mux8_16 port map(
+	muxB: mux8_16 port map(
 		in0 => Q_reg0,
 		in1 => Q_reg1,
 		in2 => Q_reg2,
@@ -122,19 +125,19 @@ begin
 		in5 => Q_reg5,
 		in6 => Q_reg6,
 		in7 => Q_reg7,
-		S[0] => src_s0,
-		S[1] => src_s1,
-		S[2] => src_s2,
+		S(0)=> src_s0,
+		S(1) => src_s1,
+		S(2) => src_s2,
 		Z => D_reg
 	);
 
-	reg0 <= Q_reg0;
-	reg1 <= Q_reg1;
-	reg2 <= Q_reg2;
-	reg3 <= Q_reg3;
-	reg4 <= Q_reg4;
-	reg5 <= Q_reg5;
-	reg6 <= Q_reg6;
-	reg7 <= Q_reg7;
+	reg_0 <= Q_reg0;
+	reg_1 <= Q_reg1;
+	reg_2 <= Q_reg2;
+	reg_3 <= Q_reg3;
+	reg_4 <= Q_reg4;
+	reg_5 <= Q_reg5;
+	reg_6 <= Q_reg6;
+	reg_7 <= Q_reg7;
 
 end behavioral;
